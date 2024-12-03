@@ -1,6 +1,7 @@
 import pkg from 'whatsapp-web.js';
 const { Client, MessageMedia } = pkg;
 import qrcode from 'qrcode-terminal';
+
 import path from 'path';
 import fs from 'fs';
 
@@ -8,49 +9,98 @@ class WhatsappService {
   constructor() {
     this.clients = new Map();
   }
-
   createClient(sessionId) {
-    // If client already exists, return it
-    if (this.clients.has(sessionId)) {
-      return this.clients.get(sessionId);
-    }
+    return new Promise((resolve, reject) => {
+      // If client already exists, return it
+      if (this.clients.has(sessionId)) {
+        return resolve(this.clients.get(sessionId));
+      }
+      // Create new client
+      const client = new Client({
+        // You can add configuration options here if needed
+      });
+  
+      // QR Code Event
+      client.on('qr', (qr) => {
+        console.log('QR Code Received for Session:', qr);
+         qrcode.generate(qr, { small: true });
+        resolve(qr); 
+      });
 
-    // Create new client
-    const client = new Client({
-      // You can add configuration options here if needed
+  
+
+
+  
+      // Ready Event
+      client.on('ready', () => {
+        console.log(`WhatsApp Client ${sessionId} is ready!`);
+      });
+  
+      // Authentication Failure
+      client.on('auth_failure', (msg) => {
+        console.error(`Authentication failure for ${sessionId}:`, msg);
+        reject(new Error(`Authentication failure for ${sessionId}: ${msg}`));
+      });
+  
+      // Disconnected Event
+      client.on('disconnected', (reason) => {
+        console.log(`Client ${sessionId} disconnected:`, reason);
+        this.clients.delete(sessionId);
+      });
+  
+      // Initialize the client
+      client.initialize();
+  
+      // Store the client
+      this.clients.set(sessionId, client);
     });
-
-    // QR Code Event
-    client.on('qr', (qr) => {
-      console.log('QR Code Received for Session:', sessionId);
-      // Generate QR in terminal for easy scanning
-      qrcode.generate(qr, { small: true });
-    });
-
-    // Ready Event
-    client.on('ready', () => {
-      console.log(`WhatsApp Client ${sessionId} is ready!`);
-    });
-
-    // Authentication Failure
-    client.on('auth_failure', (msg) => {
-      console.error(`Authentication failure for ${sessionId}:`, msg);
-    });
-
-    // Disconnected Event
-    client.on('disconnected', (reason) => {
-      console.log(`Client ${sessionId} disconnected:`, reason);
-      this.clients.delete(sessionId);
-    });
-
-    // Initialize the client
-    client.initialize();
-
-    // Store the client
-    this.clients.set(sessionId, client);
-
-    return client;
   }
+  
+
+//   createClient(sessionId) {
+//     // If client already exists, return it
+//     if (this.clients.has(sessionId)) {
+//       return this.clients.get(sessionId);
+//     }
+
+//     // Create new client
+//     const client = new Client({
+//       // You can add configuration options here if needed
+//     });
+
+//     // QR Code Event
+//     client.on('qr', (qr) => {
+//       console.log('QR Code Received for Session:', qr);
+      
+//       // Generate QR in terminal for easy scanning
+//       qrcode.generate(qr, { small: true });
+//       resolve(qr); // Resolve the promise with the QR code
+//       });
+
+//     // Ready Event
+//     client.on('ready', () => {
+//       console.log(`WhatsApp Client ${sessionId} is ready!`);
+//     });
+
+//     // Authentication Failure
+//     client.on('auth_failure', (msg) => {
+//       console.error(`Authentication failure for ${sessionId}:`, msg);
+//     });
+
+//     // Disconnected Event
+//     client.on('disconnected', (reason) => {
+//       console.log(`Client ${sessionId} disconnected:`, reason);
+//       this.clients.delete(sessionId);
+//     });
+
+//     // Initialize the client
+//     client.initialize();
+
+//     // Store the client
+//     this.clients.set(sessionId, client);
+
+//     return client;
+//   }
 
   async sendMessage(sessionId, number, message) {
     const client = this.clients.get(sessionId);
@@ -203,5 +253,4 @@ class WhatsappService {
     }
   }
 }
-
 export default new WhatsappService();

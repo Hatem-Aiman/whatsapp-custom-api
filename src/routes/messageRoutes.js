@@ -15,4 +15,5 @@ router.get('/:sessionId/contacts', MessageController.getContacts);
 router.post('/:sessionId/send-media', MessageController.sendMediaMessage);
 router.get('/:sessionId/groups', MessageController.getGroups);
 
+
 export default router;

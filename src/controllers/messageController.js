@@ -2,17 +2,18 @@ import WhatsappService from '../services/whatsappService.js';
 import path from 'path';
 
 class MessageController {
-  initializeClient(req, res) {
+  async initializeClient(req, res) {
     try {
       const { sessionId } = req.params;
-      WhatsappService.createClient(sessionId);
+      const qr = await WhatsappService.createClient(sessionId);
       res.status(200).json({ 
-        message: 'Client initialization started, check console for QR code' ,
+        message: qr,
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   }
+  
 
   async sendMessage(req, res) {
     try {
@@ -54,7 +55,7 @@ class MessageController {
     try {
       const { sessionId, chatId } = req.params;
       const { limit } = req.query;
-      
+
       const messages = await WhatsappService.getChatMessages(
         sessionId, 
         chatId, 
