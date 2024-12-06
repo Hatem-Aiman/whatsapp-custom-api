@@ -13,7 +13,6 @@ class MessageController {
       res.status(500).json({ error: error.message });
     }
   }
-  
 
   async sendMessage(req, res) {
     try {
@@ -39,12 +38,12 @@ class MessageController {
       res.status(500).json({ error: error.message });
     }
   }
-  async getChats(req, res) {
+  async getAllChats(req, res) {
     try {
       const { sessionId } = req.params;
       const { limit } = req.query;
       
-      const chats = await WhatsappService.getChats(sessionId,3);
+      const chats = await WhatsappService.getAllChat(sessionId);
       res.json(chats);
     } catch (error) {
       res.status(500).json({ error: error.message });

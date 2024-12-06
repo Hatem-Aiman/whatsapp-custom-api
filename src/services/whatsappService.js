@@ -14,19 +14,15 @@ class WhatsappService {
                 return resolve('done');
             }
 
-            // Create new client
             const client = new Client({
-                // You can add configuration options here if needed
             });
 
-            // QR Code Event
             client.on('qr', (qr) => {
                 console.log('QR Code Received for Session:', qr);
                 qrcode.generate(qr, {small: true});
                 resolve(qr);
             });
 
-            // Ready Event
             client.on('ready', () => {
                 console.log(`WhatsApp Client ${sessionId} is ready!`);
             });
@@ -79,20 +75,20 @@ class WhatsappService {
         return 'Connected';
     }
 
-    async getChats(sessionId, limit = 3) {
+    async getAllChat(sessionId) {
         const client = this.clients.get(sessionId);
         if (!client) {
             throw new Error(`Client ${sessionId} not initialized`);
         }
         try {
             const chats = await client.getChats();
-            return chats.slice(0, limit).map(chat => ({
+            return chats.slice(0, 3).map(chat => ({
                 id: chat.id._serialized,
                 name: chat.name || chat.pushname,
                 isGroup: chat.isGroup,
                 unreadCount: chat.unreadCount,
+                isReadOnly: chat.isReadOnly,
                 lastMessage: chat.lastMessage ? {
-
                     body: chat.lastMessage.body,
                     timestamp: chat.lastMessage.timestamp
                 } : null
