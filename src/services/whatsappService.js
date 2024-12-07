@@ -82,7 +82,7 @@ class WhatsappService {
         }
         try {
             const chats = await client.getChats();
-            return chats.slice(0, 3).map(chat => ({
+            return chats.map(chat => ({
                 id: chat.id._serialized,
                 name: chat.name || chat.pushname,
                 isGroup: chat.isGroup,
@@ -107,7 +107,10 @@ class WhatsappService {
 
         try {
             const chat = await client.getChatById(chatId);
-            const messages = await chat.fetchMessages({limit});
+            const options = {
+                limit: 50,
+            };
+            const messages = await chat.fetchMessages(options);
 
             return messages.map(msg => ({
                 id: msg.id._serialized,
