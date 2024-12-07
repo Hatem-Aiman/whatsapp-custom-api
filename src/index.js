@@ -11,7 +11,6 @@ const certificate = fs.readFileSync('localhost.pem', 'utf8');
 
 var credentials = {key: privateKey, cert: certificate};
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
