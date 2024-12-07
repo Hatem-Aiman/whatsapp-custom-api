@@ -27,22 +27,18 @@ class WhatsappService {
                 console.log(`WhatsApp Client ${sessionId} is ready!`);
             });
 
-            // Authentication Failure
             client.on('auth_failure', (msg) => {
                 console.error(`Authentication failure for ${sessionId}:`, msg);
                 reject(new Error(`Authentication failure for ${sessionId}: ${msg}`));
             });
 
-            // Disconnected Event
             client.on('disconnected', (reason) => {
                 console.log(`Client ${sessionId} disconnected:`, reason);
                 this.clients.delete(sessionId);
             });
 
-            // Initialize the client
             client.initialize();
 
-            // Store the client
             this.clients.set(sessionId, client);
         });
     }
@@ -148,32 +144,6 @@ class WhatsappService {
             }));
         } catch (error) {
             console.error('Error retrieving contacts:', error);
-            throw error;
-        }
-    }
-
-    async sendMediaMessage(sessionId, number, mediaPath, caption = '') {
-        const client = this.clients.get(sessionId);
-        if (!client) {
-            throw new Error(`Client ${sessionId} not initialized`);
-        }
-
-        try {
-            // Create media from file
-            const media = MessageMedia.fromFilePath(mediaPath);
-
-            // Get chat ID
-            const chatId = await client.getNumberId(number);
-            if (!chatId) {
-                throw new Error('Invalid number');
-            }
-
-            // Send media message
-            return await client.sendMessage(chatId._serialized, media, {
-                caption: caption
-            });
-        } catch (error) {
-            console.error('Error sending media message:', error);
             throw error;
         }
     }

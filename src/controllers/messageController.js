@@ -81,32 +81,6 @@ class MessageController {
     }
   }
 
-  async sendMediaMessage(req, res) {
-    try {
-      const { sessionId } = req.params;
-      const { number, caption } = req.body;
-      
-      // Assuming file is sent via multipart/form-data
-      if (!req.file) {
-        return res.status(400).json({ error: 'No media file uploaded' });
-      }
-
-      const result = await WhatsappService.sendMediaMessage(
-        sessionId, 
-        number, 
-        req.file.path, 
-        caption
-      );
-
-      res.json({ 
-        message: 'Media message sent successfully',
-        messageId: result?.id?._serialized || 'Unknown'
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
   async getGroups(req, res) {
     try {
       const { sessionId } = req.params;

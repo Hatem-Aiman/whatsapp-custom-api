@@ -9,7 +9,6 @@ router.get('/:sessionId/status', MessageController.getClientStatus);
 router.get('/:sessionId/chats', MessageController.getAllChats);
 router.get('/:sessionId/chats/:chatId/messages', MessageController.getChatMessages);
 router.get('/:sessionId/contacts', MessageController.getContacts);
-router.post('/:sessionId/send-media', MessageController.sendMediaMessage);
 router.get('/:sessionId/groups', MessageController.getGroups);
 
 
