@@ -1,7 +1,7 @@
 import pkg from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
 
-const {Client, MessageMedia} = pkg;
+const {Client, MessageMedia, LocalAuth} = pkg;
 
 class WhatsappService {
     constructor() {
@@ -15,6 +15,9 @@ class WhatsappService {
             }
 
             const client = new Client({
+                // authStrategy: new LocalAuth({
+                //     clientId: sessionId
+                // })
             });
 
             client.on('qr', (qr) => {
@@ -37,7 +40,7 @@ class WhatsappService {
                 this.clients.delete(sessionId);
             });
 
-            client.initialize();
+            client.initialize().then(r => {});
 
             this.clients.set(sessionId, client);
         });
@@ -170,6 +173,52 @@ class WhatsappService {
             }));
         } catch (error) {
             console.error('Error retrieving groups:', error);
+            throw error;
+        }
+    }
+
+    async sendMediaMessage(sessionId, number, mediaPath, caption = '') {
+        const client = this.clients.get(sessionId);
+        if (!client) {
+            throw new Error(`Client ${sessionId} not initialized`);
+        }
+
+        try {
+            const media = MessageMedia.fromFilePath(mediaPath);
+
+            const chatId = await client.getNumberId(number);
+            if (!chatId) {
+                throw new Error('Invalid number');
+            }
+
+            return await client.sendMessage(chatId._serialized, media, {
+                caption: caption
+            });
+        } catch (error) {
+            console.error('Error sending media message:', error);
+            throw error;
+        }
+    }
+    async getMediaMessage(sessionId, messageId) {
+        const client = this.clients.get(sessionId);
+        if (!client) {
+            throw new Error(`Client ${sessionId} not initialized`);
+        }
+
+        try {
+            const chat = await client.getChatById("201091095506@c.us");
+            const options = {
+                limit: 50,
+            };
+            const messages = await chat.fetchMessages(options);
+            const findMsg = messages.find(msg => msg.id._serialized === "true_201091095506@c.us_3EB026549692B1C976B222");
+            console.log(findMsg);
+            const message = await findMsg.downloadMedia();
+            console.log(message);
+
+            return message.data;
+        } catch (error) {
+            console.error('Error retrieving image:', error);
             throw error;
         }
     }

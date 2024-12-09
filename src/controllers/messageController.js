@@ -96,6 +96,43 @@ class MessageController {
     }
   }
 
+  async sendMediaMessage(req, res) {
+    try {
+      const { sessionId } = req.params;
+      const { number, caption } = req.body;
+
+      if (!req.file) {
+        console.log(req.file);
+        console.log(req.body);
+        return res.status(400).json({ error: 'No media file uploaded' });
+      }
+
+      const result = await WhatsappService.sendMediaMessage(
+          sessionId,
+          number,
+          req.file.path,
+          caption
+      );
+
+      res.json({
+        message: 'Media message sent successfully',
+        messageId: result?.id?._serialized || 'Unknown'
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getMediaMessage(req, res) {
+    try {
+      const { sessionId, messageId } = req.query;
+      const media = await WhatsappService.getMediaMessage("1", "true_201091095506@c.us_3EB0DE52D6863D16F748DB");
+      res.send(media);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
 }
 
 export default new MessageController();
