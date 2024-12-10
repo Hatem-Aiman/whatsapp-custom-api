@@ -40,7 +40,8 @@ class WhatsappService {
                 this.clients.delete(sessionId);
             });
 
-            client.initialize().then(r => {});
+            client.initialize().then(r => {
+            });
 
             this.clients.set(sessionId, client);
         });
@@ -64,7 +65,8 @@ class WhatsappService {
             throw error;
         }
     }
-     getClientStatus(sessionId) {
+
+    getClientStatus(sessionId) {
         let client = this.clients.get(sessionId);
         if (!client) {
             this.createClient(sessionId).then(() => {
@@ -82,7 +84,11 @@ class WhatsappService {
         try {
             const chats = await client.getChats();
             return chats.map(chat => ({
-                id: chat.id._serialized,
+                id: {
+                    server: chat.id.server,
+                    user: chat.id.user,
+                    _serialized: chat.id._serialized
+                },
                 name: chat.name || chat.pushname,
                 isGroup: chat.isGroup,
                 unreadCount: chat.unreadCount,
@@ -216,6 +222,7 @@ class WhatsappService {
             throw error;
         }
     }
+
     async getMediaMessage(sessionId, messageId) {
         const client = this.clients.get(sessionId);
         if (!client) {
