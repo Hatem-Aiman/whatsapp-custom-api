@@ -125,8 +125,8 @@ class MessageController {
 
   async getMediaMessage(req, res) {
     try {
-      const { sessionId, messageId } = req.query;
-      const media = await WhatsappService.getMediaMessage("1", "true_201091095506@c.us_3EB0DE52D6863D16F748DB");
+      const { sessionId, messageId } = req.params;
+      const media = await WhatsappService.getMediaMessage(sessionId, messageId);
       res.send(media);
     } catch (error) {
       res.status(500).json({ error: error.message });

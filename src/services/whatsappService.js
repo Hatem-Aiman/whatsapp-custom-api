@@ -111,16 +111,33 @@ class WhatsappService {
             };
             const messages = await chat.fetchMessages(options);
 
-            return messages.map(msg => ({
-                id: msg.id._serialized,
-                body: msg.body,
-                timestamp: msg.timestamp,
-                from: msg.from,
-                to: msg.to,
-                type: msg.type,
-                isMedia: msg.hasMedia,
-                isForwarded: msg.isForwarded
+            const messagesWithMedia = await Promise.all(messages.map(async (msg) => {
+                let mediaData = null;
+                if (msg.type === 'image' || msg.type === 'document') {
+                    mediaData = await this.getMediaMessage(sessionId, msg.id._serialized);
+                }
+                return {
+                    id: msg.id._serialized,
+                    body: msg.body,
+                    timestamp: msg.timestamp,
+                    from: msg.from,
+                    to: msg.to,
+                    type: msg.type,
+                    isMedia: msg.hasMedia,
+                    isForwarded: msg.isForwarded,
+                    ack: msg.ack,
+                    author: msg.author,
+                    broadcast: msg.broadcast,
+                    fromMe: msg.fromMe,
+                    hasQuotedMsg: msg.hasQuotedMsg,
+                    hasReaction: msg.hasReaction,
+                    location: msg.location,
+                    mentionedIds: msg.mentionedIds,
+                    mediaData: mediaData?.data,
+                    mediaName: mediaData?.filename || null,
+                };
             }));
+            return messagesWithMedia;
         } catch (error) {
             console.error('Error retrieving chat messages:', error);
             throw error;
@@ -204,21 +221,11 @@ class WhatsappService {
         if (!client) {
             throw new Error(`Client ${sessionId} not initialized`);
         }
-
         try {
-            const chat = await client.getChatById("201091095506@c.us");
-            const options = {
-                limit: 50,
-            };
-            const messages = await chat.fetchMessages(options);
-            const findMsg = messages.find(msg => msg.id._serialized === "true_201091095506@c.us_3EB026549692B1C976B222");
-            console.log(findMsg);
-            const message = await findMsg.downloadMedia();
-            console.log(message);
-
-            return message.data;
+            const msg = await client.getMessageById(messageId);
+            const message = await msg.downloadMedia();
+            return message;
         } catch (error) {
-            console.error('Error retrieving image:', error);
             throw error;
         }
     }
