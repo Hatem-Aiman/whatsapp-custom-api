@@ -13,6 +13,15 @@ class MessageController {
       res.status(500).json({ error: error.message });
     }
   }
+  async logOut(req, res) {
+    try {
+      const { sessionId } = req.params;
+      await WhatsappService.logOut(sessionId);
+      res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 
   async sendMessage(req, res) {
     try {

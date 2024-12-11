@@ -10,8 +10,13 @@ class WhatsappService {
 
     createClient(sessionId) {
         return new Promise((resolve, reject) => {
-            if (this.clients.has(sessionId)) {
-                return resolve('done');
+            const existingClient = this.clients.get(sessionId);
+
+            if (existingClient) {
+                if (existingClient.isReady) {
+                    return resolve('done');
+                }
+                return resolve(this.generateQRCode(existingClient));
             }
 
             const client = new Client({
@@ -28,6 +33,7 @@ class WhatsappService {
 
             client.on('ready', () => {
                 console.log(`WhatsApp Client ${sessionId} is ready!`);
+                client.isReady = true;
             });
 
             client.on('auth_failure', (msg) => {
@@ -40,12 +46,37 @@ class WhatsappService {
                 this.clients.delete(sessionId);
             });
 
-            client.initialize().then(r => {
-            });
+            client.initialize().then(r => {});
 
             this.clients.set(sessionId, client);
         });
     }
+
+    generateQRCode(client) {
+        return new Promise((resolve, reject) => {
+            client.on('qr', (qr) => {
+                console.log('QR Code Received:', qr);
+                qrcode.generate(qr, {small: true});
+                resolve(qr);
+            });
+        });
+    }
+
+    async logOut(sessionId) {
+        const client = this.clients.get(sessionId);
+        if (!client) {
+            throw new Error(`Client ${sessionId} not initialized`);
+        }
+
+        try {
+            await client.logout();
+            this.clients.delete(sessionId);
+        } catch (error) {
+            console.error('Error logging out:', error);
+            throw error;
+        }
+    }
+
 
     async sendMessage(sessionId, number, message) {
         const client = this.clients.get(sessionId);

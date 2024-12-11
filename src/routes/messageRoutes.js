@@ -14,6 +14,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post('/:sessionId/initialize', MessageController.initializeClient);
+router.post('/:sessionId/logOut', MessageController.logOut);
 router.post('/:sessionId/send', MessageController.sendMessage);
 router.get('/:sessionId/status', MessageController.getClientStatus);
 router.get('/:sessionId/chats', MessageController.getAllChats);
