@@ -1,3 +1,2 @@
-2024/12/09-10:59:09.002 9f0 Reusing MANIFEST C:\Users\Hatem\Desktop\whatsapp-web-api\src\.wwebjs_auth\session-1\Default\Service Worker\Database/MANIFEST-000001
-2024/12/09-10:59:09.003 9f0 Recovering log #3
-2024/12/09-10:59:09.004 9f0 Reusing old log C:\Users\Hatem\Desktop\whatsapp-web-api\src\.wwebjs_auth\session-1\Default\Service Worker\Database/000003.log 
+2024/12/11-16:12:49.793 70f8 Creating DB C:\Users\hatem\WebstormProjects\whatsapp-custom-api\src\.wwebjs_auth\session-1\Default\Service Worker\Database since it was missing.
+2024/12/11-16:12:49.799 70f8 Reusing MANIFEST C:\Users\hatem\WebstormProjects\whatsapp-custom-api\src\.wwebjs_auth\session-1\Default\Service Worker\Database/MANIFEST-000001

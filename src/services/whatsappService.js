@@ -20,15 +20,24 @@ class WhatsappService {
             }
 
             const client = new Client({
-                // authStrategy: new LocalAuth({
-                //     clientId: sessionId
-                // })
+                authStrategy: new LocalAuth({
+                    clientId: sessionId
+                })
             });
 
             client.on('qr', (qr) => {
                 console.log('QR Code Received for Session:', qr);
                 qrcode.generate(qr, {small: true});
                 resolve(qr);
+            });
+
+            client.on('message', (msg) => {
+                console.log('Message Received:', msg);
+
+            });
+
+            client.on('message_create', message => {
+                console.log(message.body);
             });
 
             client.on('ready', () => {
@@ -46,7 +55,8 @@ class WhatsappService {
                 this.clients.delete(sessionId);
             });
 
-            client.initialize().then(r => {});
+            client.initialize().then(r => {
+            });
 
             this.clients.set(sessionId, client);
         });

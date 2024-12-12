@@ -3,6 +3,7 @@ import MessageController from '../controllers/messageController.js';
 import multer from "multer";
 
 const router = express.Router();
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
@@ -11,6 +12,7 @@ const storage = multer.diskStorage({
         cb(null, `${Date.now()}-${file.originalname}`);
     }
 });
+
 const upload = multer({ storage: storage });
 
 router.post('/:sessionId/initialize', MessageController.initializeClient);
