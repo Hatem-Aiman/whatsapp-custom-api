@@ -1,2 +1,7 @@
 node_modules
 .env
+/src/.wwebjs_auth/
+/src/.wwebjs_cache/
+/src/uploads/
+/src/localhost-key.pem
+/src/localhost.pem
