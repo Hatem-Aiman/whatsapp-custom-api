@@ -38,7 +38,7 @@ class MessageController {
         }
     }
 
-    getClientStatus(req, res) {
+      getClientStatus(req, res) {
         try {
             const {sessionId} = req.params;
             const status = WhatsappService.getClientStatus(sessionId);
