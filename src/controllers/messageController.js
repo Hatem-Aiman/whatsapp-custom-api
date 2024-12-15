@@ -38,11 +38,11 @@ class MessageController {
         }
     }
 
-      getClientStatus(req, res) {
+    async getClientStatus(req, res) {
         try {
             const {sessionId} = req.params;
-            const status = WhatsappService.getClientStatus(sessionId);
-            res.status(200).json({status});
+            const status = await WhatsappService.getClientStatus(sessionId);
+            res.send(status);
         } catch (error) {
             res.status(500).json({error: error.message});
         }

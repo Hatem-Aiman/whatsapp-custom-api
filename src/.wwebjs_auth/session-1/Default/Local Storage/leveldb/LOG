@@ -1,6 +1,2 @@
-2024/12/11-16:26:20.898 64c4 Reusing MANIFEST C:\Users\hatem\WebstormProjects\whatsapp-custom-api\src\.wwebjs_auth\session-1\Default\Local Storage\leveldb/MANIFEST-000001
-2024/12/11-16:26:20.898 64c4 Recovering log #3
-2024/12/11-16:26:20.898 64c4 Reusing old log C:\Users\hatem\WebstormProjects\whatsapp-custom-api\src\.wwebjs_auth\session-1\Default\Local Storage\leveldb/000003.log 
-2024/12/11-21:06:44.219 21a0 Level-0 table #5: started
-2024/12/11-21:06:44.226 21a0 Level-0 table #5: 16284 bytes OK
-2024/12/11-21:06:44.230 21a0 Delete type=0 #3
+2024/12/15-17:07:47.098 1b8c Creating DB C:\Users\Hatem\Desktop\whatsapp-web-api\src\.wwebjs_auth\session-1\Default\Local Storage\leveldb since it was missing.
+2024/12/15-17:07:47.120 1b8c Reusing MANIFEST C:\Users\Hatem\Desktop\whatsapp-web-api\src\.wwebjs_auth\session-1\Default\Local Storage\leveldb/MANIFEST-000001

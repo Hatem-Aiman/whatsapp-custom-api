@@ -1,7 +1,7 @@
 import pkg from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
 
-const {Client, MessageMedia, LocalAuth} = pkg;
+const {Client, MessageMedia, LocalAuth, WAState} = pkg;
 
 class WhatsappService {
     constructor() {
@@ -11,38 +11,36 @@ class WhatsappService {
     createClient(sessionId) {
         return new Promise((resolve, reject) => {
             const existingClient = this.clients.get(sessionId);
-
             if (existingClient) {
-                if (existingClient.isReady) {
-                    return resolve('done');
-                }
-                return resolve(this.generateQRCode(existingClient));
+                existingClient.logOut();
+                this.clients.delete(sessionId);
             }
 
             const client = new Client({
                 authStrategy: new LocalAuth({
-                    clientId: sessionId
+                    clientId: sessionId,
                 })
             });
 
+
             client.on('qr', (qr) => {
-                console.log('QR Code Received for Session:', qr);
                 qrcode.generate(qr, {small: true});
                 resolve(qr);
             });
 
             client.on('message', (msg) => {
                 console.log('Message Received:', msg);
-
+                this.sendUpdateMessage(sessionId,msg.id.remote).then(r => {});
             });
 
             client.on('message_create', message => {
-                console.log(message.body);
+                console.log(message);
+                this.sendUpdateMessage(sessionId,message.id.remote).then(r => {});
             });
 
             client.on('ready', () => {
                 console.log(`WhatsApp Client ${sessionId} is ready!`);
-                client.isReady = true;
+                // this.sendUpdateSession(sessionId).then(r => {});
             });
 
             client.on('auth_failure', (msg) => {
@@ -57,7 +55,6 @@ class WhatsappService {
 
             client.initialize().then(r => {
             });
-
             this.clients.set(sessionId, client);
         });
     }
@@ -87,6 +84,18 @@ class WhatsappService {
         }
     }
 
+    async getClientStatus(sessionId) {
+        let client = this.clients.get(sessionId);
+        try {
+            if (client) {
+                const state = await client.getState();
+                return state;
+            }
+            return WAState.UNPAIRED;
+        } catch (error) {
+            return error;
+        }
+    }
 
     async sendMessage(sessionId, number, message) {
         const client = this.clients.get(sessionId);
@@ -99,7 +108,6 @@ class WhatsappService {
             if (!chatId) {
                 throw new Error('Invalid number');
             }
-
             return await client.sendMessage(chatId._serialized, message);
         } catch (error) {
             console.error('Error sending message:', error);
@@ -107,15 +115,6 @@ class WhatsappService {
         }
     }
 
-    getClientStatus(sessionId) {
-        let client = this.clients.get(sessionId);
-        if (!client) {
-            this.createClient(sessionId).then(() => {
-                return 'Connected';
-            });
-        }
-        return 'Connected';
-    }
 
     async getAllChat(sessionId) {
         const client = this.clients.get(sessionId);
@@ -160,7 +159,7 @@ class WhatsappService {
 
             const messagesWithMedia = await Promise.all(messages.map(async (msg) => {
                 let mediaData = null;
-                if (msg.type === 'image' || msg.type === 'document') {
+                if (msg.type === 'image' || msg.type === 'document' || msg.type === 'video' || msg.type === 'audio' || msg.type === 'sticker' || msg.type === 'ptt') {
                     mediaData = await this.getMediaMessage(sessionId, msg.id._serialized);
                 }
                 return {
@@ -259,7 +258,6 @@ class WhatsappService {
                 caption: caption
             });
         } catch (error) {
-            console.error('Error sending media message:', error);
             throw error;
         }
     }
@@ -272,12 +270,65 @@ class WhatsappService {
         try {
             const msg = await client.getMessageById(messageId);
             const message = await msg.downloadMedia();
+            console.log(messageId, message);
             return message;
         } catch (error) {
             throw error;
         }
     }
 
+    async sendUpdateMessage(sessionId,msg) {
+        const client = this.clients.get(sessionId);
+        if (!client) {
+            throw new Error(`Client ${sessionId} not initialized`);
+        }
+        try {
+            process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+            await fetch('https://localhost:4100/api/whatsapp-web/update/message/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    SessionId: sessionId,
+                    Message: msg
+                })
+            })
+                .then(response => response.json())
+                .then(data => console.log('Success:', data))
+                .catch(error => console.error('Error:', error));
+        } catch (error) {
+            console.error('Error sending update:', error);
+            throw error;
+        }
+    }
+
+    async sendUpdateSession(sessionId) {
+        const client = this.clients.get(sessionId);
+        if (!client) {
+            throw new Error(`Client ${sessionId} not initialized`);
+        }
+
+        try {
+            process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+            fetch('https://localhost:4100/api/whatsapp-web/update/session/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    SessionId: '1'
+                })
+            })
+                .then(response => response.json())
+                .then(data => console.log('Success:', data))
+                .catch(error => console.error('Error:', error));
+        } catch (error) {
+            console.error('Error occurred while fetching:', error);
+        }
+    }
 }
 
 export default new WhatsappService();
